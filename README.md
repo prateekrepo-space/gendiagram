@@ -31,7 +31,6 @@ A modern MERN stack application that generates Mermaid.js diagrams from natural 
    npm run dev
    ```
 
-3. Open `http://localhost:5173` in your browser.
 
 ## Tech Stack
 - **Frontend**: React, Vite, Tailwind CSS, Mermaid.js
