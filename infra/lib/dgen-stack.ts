@@ -322,7 +322,7 @@ export class DgenStack extends cdk.Stack {
               owner: 'prateekrepo-space',
               repo: 'gendiagram',
               branch: 'main',
-              connectionArn: `arn:aws:codeconnections:ap-south-1:${this.account}:connection/REPLACE_WITH_CONNECTION_ID`,
+              connectionArn: 'arn:aws:codeconnections:ap-south-1:187004426499:connection/b6ecc572-bb6f-4b20-bc99-7881c8615754',
               output: sourceArtifact,
             }),
           ],
