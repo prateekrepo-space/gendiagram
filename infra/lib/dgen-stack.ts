@@ -53,26 +53,26 @@ export class DgenStack extends cdk.Stack {
 
     // ── Security Groups ───────────────────────────────────────────────────────
     const albSG = new ec2.SecurityGroup(this, 'AlbSG', {
-      vpc, description: 'ALB — allow HTTP from internet',
+      vpc, description: 'ALB - allow HTTP from internet',
       allowAllOutbound: true,
     });
     albSG.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'HTTP from internet');
 
     const ecsSG = new ec2.SecurityGroup(this, 'EcsSG', {
-      vpc, description: 'ECS Frontend — allow from ALB',
+      vpc, description: 'ECS Frontend - allow from ALB',
       allowAllOutbound: true,
     });
     ecsSG.addIngressRule(albSG, ec2.Port.tcp(80), 'From ALB');
 
     const ec2SG = new ec2.SecurityGroup(this, 'BackendSG', {
-      vpc, description: 'EC2 Backend — allow port 5000 from ALB',
+      vpc, description: 'EC2 Backend - allow port 5000 from ALB',
       allowAllOutbound: true,
     });
     ec2SG.addIngressRule(albSG, ec2.Port.tcp(5000), 'API from ALB');
     // SSM Session Manager needs outbound 443 (already allowed via allowAllOutbound)
 
     const rdsSG = new ec2.SecurityGroup(this, 'RdsSG', {
-      vpc, description: 'RDS — allow from EC2 backend only',
+      vpc, description: 'RDS - allow from EC2 backend only',
       allowAllOutbound: false,
     });
     rdsSG.addIngressRule(ec2SG, ec2.Port.tcp(5432), 'Postgres from backend');
