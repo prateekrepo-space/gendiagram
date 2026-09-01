@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 const express = require('express');
 const cors = require('cors');
@@ -44,7 +44,7 @@ app.post('/api/generate', async (req, res) => {
         else fullPrompt += "\nStart with 'graph TD'";
 
         const command = new ConverseCommand({
-            modelId: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+            modelId: 'amazon.nova-micro-v1:0',
             system: [{ text: SYSTEM_INSTRUCTION }],
             messages: [{ role: 'user', content: [{ text: fullPrompt }] }],
             inferenceConfig: { maxTokens: 2048, temperature: 0.3 },

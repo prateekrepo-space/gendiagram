@@ -103,7 +103,7 @@ export class DgenStack extends cdk.Stack {
     ec2Role.addToPolicy(new iam.PolicyStatement({
       actions: ['bedrock:InvokeModel', 'bedrock:Converse'],
       resources: [
-        `arn:aws:bedrock:ap-south-1::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0`,
+        `arn:aws:bedrock:ap-south-1::foundation-model/amazon.nova-micro-v1:0`,
       ],
     }));
     // S3
