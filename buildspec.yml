@@ -1,0 +1,40 @@
+﻿version: 0.2
+
+env:
+  variables:
+    AWS_REGION: ap-south-1
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - echo "Installing CDK tools..."
+      - npm install -g aws-cdk ts-node typescript
+      - cd infra && npm install
+
+  build:
+    commands:
+      - echo "Running CDK deploy..."
+      - cd infra && cdk deploy --require-approval never
+
+  post_build:
+    commands:
+      - echo "Deployment complete!"
+      - |
+        INSTANCE_ID=$(aws autoscaling describe-auto-scaling-groups \
+          --query "AutoScalingGroups[?contains(to_string(Tags), 'DgenStack')].Instances[0].InstanceId" \
+          --output text --region $AWS_REGION 2>/dev/null | head -1)
+        if [ ! -z "$INSTANCE_ID" ] && [ "$INSTANCE_ID" != "None" ]; then
+          echo "Updating backend on EC2: $INSTANCE_ID"
+          aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["cd /app && git pull && cd /app/server && npm install --omit=dev && pm2 reload server --update-env"]' \
+            --region $AWS_REGION
+        fi
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: infra/cdk.out

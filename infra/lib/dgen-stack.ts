@@ -10,6 +10,9 @@ import * as autoscaling from 'aws-cdk-lib/aws-autoscaling';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as ecr_assets from 'aws-cdk-lib/aws-ecr-assets';
+import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
+import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
+import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import * as path from 'path';
 
 export class DgenStack extends cdk.Stack {
@@ -268,6 +271,79 @@ export class DgenStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'DbEndpoint', {
       value: dbInstance.dbInstanceEndpointAddress,
       description: 'RDS PostgreSQL endpoint',
+    });
+
+    // ── AWS CodePipeline (CI/CD — fully AWS-native) ───────────────────────────
+    // Artifact store
+    const artifactBucket = new s3.Bucket(this, 'PipelineArtifacts', {
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+    });
+
+    // Source artifacts
+    const sourceArtifact = new codepipeline.Artifact('Source');
+    const buildArtifact  = new codepipeline.Artifact('Build');
+
+    // CodeBuild role — needs CDK deploy permissions
+    const buildRole = new iam.Role(this, 'CodeBuildRole', {
+      assumedBy: new iam.ServicePrincipal('codebuild.amazonaws.com'),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'),
+      ],
+    });
+
+    // CodeBuild project — runs cdk deploy + updates EC2 backend via SSM
+    const buildProject = new codebuild.PipelineProject(this, 'DgenBuild', {
+      projectName: 'dgen-cdk-deploy',
+      role: buildRole,
+      environment: {
+        buildImage: codebuild.LinuxBuildImage.STANDARD_7_0,
+        privileged: true,   // needed for Docker (building frontend image)
+        computeType: codebuild.ComputeType.SMALL,
+      },
+      buildSpec: codebuild.BuildSpec.fromSourceFilename('buildspec.yml'),
+      environmentVariables: {
+        AWS_REGION: { value: 'ap-south-1' },
+      },
+      timeout: cdk.Duration.minutes(30),
+    });
+
+    // CodePipeline
+    const pipeline = new codepipeline.Pipeline(this, 'DgenPipeline', {
+      pipelineName: 'dgen-deploy-pipeline',
+      artifactBucket,
+      stages: [
+        {
+          stageName: 'Source',
+          actions: [
+            new codepipeline_actions.CodeStarConnectionsSourceAction({
+              actionName: 'GitHub_Source',
+              owner: 'prateekrepo-space',
+              repo: 'gendiagram',
+              branch: 'main',
+              connectionArn: `arn:aws:codeconnections:ap-south-1:${this.account}:connection/REPLACE_WITH_CONNECTION_ID`,
+              output: sourceArtifact,
+            }),
+          ],
+        },
+        {
+          stageName: 'Deploy',
+          actions: [
+            new codepipeline_actions.CodeBuildAction({
+              actionName: 'CDK_Deploy',
+              project: buildProject,
+              input: sourceArtifact,
+              outputs: [buildArtifact],
+            }),
+          ],
+        },
+      ],
+    });
+
+    new cdk.CfnOutput(this, 'PipelineUrl', {
+      value: `https://ap-south-1.console.aws.amazon.com/codesuite/codepipeline/pipelines/dgen-deploy-pipeline/view`,
+      description: 'AWS CodePipeline URL',
     });
   }
 }
