@@ -17,3 +17,5 @@ yarn-debug.log*
 yarn-error.log*
 coverage/
 /.history/
+cdk.out/
+node_modules/
