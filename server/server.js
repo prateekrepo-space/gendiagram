@@ -44,7 +44,7 @@ app.post('/api/generate', async (req, res) => {
         else fullPrompt += "\nStart with 'graph TD'";
 
         const command = new ConverseCommand({
-            modelId: 'amazon.nova-micro-v1:0',
+            modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
             system: [{ text: SYSTEM_INSTRUCTION }],
             messages: [{ role: 'user', content: [{ text: fullPrompt }] }],
             inferenceConfig: { maxTokens: 2048, temperature: 0.3 },
