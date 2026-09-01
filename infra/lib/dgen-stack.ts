@@ -152,18 +152,22 @@ export class DgenStack extends cdk.Stack {
       'pm2 save',
     );
 
-    // ── EC2 Auto Scaling Group ────────────────────────────────────────────────
-    const asg = new autoscaling.AutoScalingGroup(this, 'BackendASG', {
-      vpc,
-      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+    // ── EC2 Launch Template & Auto Scaling Group ─────────────────────────────
+    const launchTemplate = new ec2.LaunchTemplate(this, 'BackendLaunchTemplate', {
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.SMALL),
       machineImage: ec2.MachineImage.latestAmazonLinux2023(),
-      minCapacity: 1,
-      maxCapacity: 1,
       securityGroup: ec2SG,
       role: ec2Role,
       userData,
       associatePublicIpAddress: true,
+    });
+
+    const asg = new autoscaling.AutoScalingGroup(this, 'BackendASG', {
+      vpc,
+      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+      launchTemplate,
+      minCapacity: 1,
+      maxCapacity: 1,
     });
 
     // ── ECS Cluster + Fargate Service (Frontend) ──────────────────────────────
