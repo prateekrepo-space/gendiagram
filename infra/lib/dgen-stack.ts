@@ -103,12 +103,10 @@ export class DgenStack extends cdk.Stack {
         iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'),
       ],
     });
-    // Bedrock — invoke Claude 3.5 Sonnet
+    // Bedrock — invoke models (Amazon Nova, Claude, etc.)
     ec2Role.addToPolicy(new iam.PolicyStatement({
       actions: ['bedrock:InvokeModel', 'bedrock:Converse'],
-      resources: [
-        `arn:aws:bedrock:ap-south-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0`,
-      ],
+      resources: ['*'],
     }));
     // S3
     diagramsBucket.grantReadWrite(ec2Role);

@@ -12,10 +12,12 @@ const pool = require('./db');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const AWS_REGION = process.env.AWS_REGION || 'ap-south-1';
+const BEDROCK_REGION = process.env.BEDROCK_REGION || 'us-east-1';
+const BEDROCK_MODEL_ID = process.env.BEDROCK_MODEL_ID || 'amazon.nova-micro-v1:0';
 const S3_BUCKET = process.env.S3_BUCKET;
 
 // ── AWS Clients (use EC2 instance profile credentials automatically) ──────────
-const bedrockClient = new BedrockRuntimeClient({ region: AWS_REGION });
+const bedrockClient = new BedrockRuntimeClient({ region: BEDROCK_REGION });
 const s3Client = new S3Client({ region: AWS_REGION });
 
 // ── Middleware ────────────────────────────────────────────────────────────────
@@ -46,7 +48,7 @@ app.post('/api/generate', async (req, res) => {
         else fullPrompt += "\nStart with 'graph TD'";
 
         const command = new ConverseCommand({
-            modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
+            modelId: BEDROCK_MODEL_ID,
             system: [{ text: SYSTEM_INSTRUCTION }],
             messages: [{ role: 'user', content: [{ text: fullPrompt }] }],
             inferenceConfig: { maxTokens: 2048, temperature: 0.3 },
@@ -55,8 +57,13 @@ app.post('/api/generate', async (req, res) => {
         const bedrockResponse = await bedrockClient.send(command);
         let text = bedrockResponse.output.message.content[0].text;
 
-        // Strip any accidental markdown fences
-        text = text.replace(/```mermaid/gi, '').replace(/```/g, '').trim();
+        // Extract raw Mermaid code if enclosed in code fences or followed by explanations
+        const match = text.match(/```(?:mermaid)?([\s\S]*?)```/i);
+        if (match) {
+            text = match[1].trim();
+        } else {
+            text = text.replace(/```mermaid/gi, '').replace(/```/g, '').trim();
+        }
 
         res.json({ mermaidCode: text });
     } catch (error) {
