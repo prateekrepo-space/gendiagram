@@ -1,9 +1,7 @@
 'use strict';
 
-/**
- * init-db.js — Run once on first EC2 boot via UserData to create schema.
- * Usage: node init-db.js
- */
+require('dotenv').config();
+
 const pool = require('./db');
 
 const CREATE_TABLE = `
