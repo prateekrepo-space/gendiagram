@@ -7,6 +7,7 @@ const cors = require('cors');
 const { BedrockRuntimeClient, ConverseCommand } = require('@aws-sdk/client-bedrock-runtime');
 const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const pool = require('./db');
 
 const app = express();
@@ -15,10 +16,12 @@ const AWS_REGION = process.env.AWS_REGION || 'ap-south-1';
 const BEDROCK_REGION = process.env.BEDROCK_REGION || 'us-east-1';
 const BEDROCK_MODEL_ID = process.env.BEDROCK_MODEL_ID || 'amazon.nova-micro-v1:0';
 const S3_BUCKET = process.env.S3_BUCKET;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// ── AWS Clients (use EC2 instance profile credentials automatically) ──────────
+// ── AI & AWS Clients ─────────────────────────────────────────────────────────
 const bedrockClient = new BedrockRuntimeClient({ region: BEDROCK_REGION });
 const s3Client = new S3Client({ region: AWS_REGION });
+const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors());
@@ -29,7 +32,7 @@ const SYSTEM_INSTRUCTION = `You are a Mermaid.js diagram code generator.
 Convert natural language descriptions into valid Mermaid.js diagrams.
 
 Rules:
-1. Output ONLY raw Mermaid code — no backticks, no markdown fences, no explanations.
+1. Output ONLY raw Mermaid code - no backticks, no markdown fences, no explanations.
 2. Start with the correct diagram type keyword (graph TD, sequenceDiagram, classDiagram, stateDiagram-v2).
 3. Ensure 100% valid Mermaid syntax.
 4. Make diagrams clear, well-labelled, and informative.`;
@@ -47,15 +50,34 @@ app.post('/api/generate', async (req, res) => {
         else if (type === 'stateDiagram') fullPrompt += "\nStart with 'stateDiagram-v2'";
         else fullPrompt += "\nStart with 'graph TD'";
 
-        const command = new ConverseCommand({
-            modelId: BEDROCK_MODEL_ID,
-            system: [{ text: SYSTEM_INSTRUCTION }],
-            messages: [{ role: 'user', content: [{ text: fullPrompt }] }],
-            inferenceConfig: { maxTokens: 2048, temperature: 0.3 },
-        });
+        let text = null;
 
-        const bedrockResponse = await bedrockClient.send(command);
-        let text = bedrockResponse.output.message.content[0].text;
+        // 1. Try AWS Bedrock Primary
+        try {
+            const command = new ConverseCommand({
+                modelId: BEDROCK_MODEL_ID,
+                system: [{ text: SYSTEM_INSTRUCTION }],
+                messages: [{ role: 'user', content: [{ text: fullPrompt }] }],
+                inferenceConfig: { maxTokens: 2048, temperature: 0.3 },
+            });
+
+            const bedrockResponse = await bedrockClient.send(command);
+            text = bedrockResponse.output.message.content[0].text;
+        } catch (bedrockErr) {
+            console.warn('Bedrock call failed:', bedrockErr.message);
+            // 2. Fallback to Gemini if configured
+            if (genAI) {
+                console.log('Using Gemini fallback...');
+                const model = genAI.getGenerativeModel({
+                    model: 'gemini-2.0-flash',
+                    systemInstruction: SYSTEM_INSTRUCTION,
+                });
+                const result = await model.generateContent(fullPrompt);
+                text = result.response.text();
+            } else {
+                throw bedrockErr;
+            }
+        }
 
         // Extract raw Mermaid code if enclosed in code fences or followed by explanations
         const match = text.match(/```(?:mermaid)?([\s\S]*?)```/i);
