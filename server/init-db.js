@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 /**
  * init-db.js — Run once on first EC2 boot via UserData to create schema.
@@ -20,13 +20,23 @@ CREATE INDEX IF NOT EXISTS idx_diagrams_created_at ON diagrams (created_at DESC)
 `;
 
 (async () => {
-    try {
-        await pool.query(CREATE_TABLE);
-        console.log('DB schema initialised successfully.');
-    } catch (err) {
-        console.error('Failed to initialise schema:', err.message);
-        process.exit(1);
-    } finally {
-        await pool.end();
+    const maxRetries = 10;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            console.log(`Attempt ${attempt}/${maxRetries}: Connecting to database...`);
+            await pool.query(CREATE_TABLE);
+            console.log('DB schema initialised successfully.');
+            await pool.end();
+            process.exit(0);
+        } catch (err) {
+            console.warn(`Attempt ${attempt} failed: ${err.message}`);
+            if (attempt === maxRetries) {
+                console.error('All retries exhausted. Failed to initialise schema.');
+                await pool.end();
+                process.exit(1);
+            }
+            console.log('Retrying in 5 seconds...');
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
     }
 })();

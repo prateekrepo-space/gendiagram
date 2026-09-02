@@ -1,4 +1,4 @@
-﻿import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Wand2, Loader2, ArrowLeft, Save, BookOpen, X, Clock } from 'lucide-react';
 import MermaidRenderer from './MermaidRenderer';
 
