@@ -155,7 +155,7 @@ export class DgenStack extends cdk.Stack {
 
     // ── EC2 Launch Template & Auto Scaling Group ─────────────────────────────
     const launchTemplate = new ec2.LaunchTemplate(this, 'BackendLaunchTemplate', {
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.SMALL),
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
       machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       securityGroup: ec2SG,
       role: ec2Role,
@@ -207,6 +207,8 @@ export class DgenStack extends cdk.Stack {
       vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
       securityGroups: [ecsSG],
       assignPublicIp: true,
+      circuitBreaker: { rollback: true },
+      minHealthyPercent: 50,
     });
 
     // ── ALB ───────────────────────────────────────────────────────────────────
@@ -231,10 +233,10 @@ export class DgenStack extends cdk.Stack {
       healthCheck: {
         path: '/',
         healthyHttpCodes: '200',
-        interval: cdk.Duration.seconds(30),
+        interval: cdk.Duration.seconds(15),
         timeout: cdk.Duration.seconds(5),
         healthyThresholdCount: 2,
-        unhealthyThresholdCount: 3,
+        unhealthyThresholdCount: 2,
       },
     });
     asg.attachToApplicationTargetGroup(backendTG);
@@ -248,8 +250,10 @@ export class DgenStack extends cdk.Stack {
       healthCheck: {
         path: '/health',
         healthyHttpCodes: '200',
-        interval: cdk.Duration.seconds(30),
+        interval: cdk.Duration.seconds(15),
         timeout: cdk.Duration.seconds(5),
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 2,
       },
     });
     fargateService.attachToApplicationTargetGroup(frontendTG);
