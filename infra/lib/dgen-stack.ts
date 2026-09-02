@@ -177,7 +177,15 @@ export class DgenStack extends cdk.Stack {
       clusterName: 'dgen-cluster',
     });
 
-    // IAM role for ECS task (no Bedrock needed — frontend only serves static files)
+    // IAM execution role for ECS agent (ECR pull + CloudWatch logs)
+    const executionRole = new iam.Role(this, 'FrontendExecutionRole', {
+      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'),
+      ],
+    });
+
+    // IAM task role for application inside container
     const taskRole = new iam.Role(this, 'FrontendTaskRole', {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
     });
@@ -185,7 +193,12 @@ export class DgenStack extends cdk.Stack {
     const taskDef = new ecs.FargateTaskDefinition(this, 'FrontendTaskDef', {
       memoryLimitMiB: 512,
       cpu: 256,
+      executionRole,
       taskRole,
+      runtimePlatform: {
+        operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+        cpuArchitecture: ecs.CpuArchitecture.X86_64,
+      },
     });
 
     // Build + push frontend Docker image via CDK asset
@@ -219,10 +232,22 @@ export class DgenStack extends cdk.Stack {
       loadBalancerName: 'dgen-alb',
     });
 
-    const listener = alb.addListener('HttpListener', {
+    // Target group for ECS frontend (port 80)
+    const frontendTG = new elbv2.ApplicationTargetGroup(this, 'FrontendTG', {
+      vpc,
       port: 80,
-      open: true,
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      targetType: elbv2.TargetType.IP,
+      healthCheck: {
+        path: '/health',
+        healthyHttpCodes: '200',
+        interval: cdk.Duration.seconds(15),
+        timeout: cdk.Duration.seconds(5),
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 2,
+      },
     });
+    fargateService.attachToApplicationTargetGroup(frontendTG);
 
     // Target group for EC2 backend (port 5000)
     const backendTG = new elbv2.ApplicationTargetGroup(this, 'BackendTG', {
@@ -241,31 +266,18 @@ export class DgenStack extends cdk.Stack {
     });
     asg.attachToApplicationTargetGroup(backendTG);
 
-    // Target group for ECS frontend (port 80)
-    const frontendTG = new elbv2.ApplicationTargetGroup(this, 'FrontendTG', {
-      vpc,
+    // Default listener action -> Frontend
+    const listener = alb.addListener('HttpListener', {
       port: 80,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      targetType: elbv2.TargetType.IP,
-      healthCheck: {
-        path: '/health',
-        healthyHttpCodes: '200',
-        interval: cdk.Duration.seconds(15),
-        timeout: cdk.Duration.seconds(5),
-        healthyThresholdCount: 2,
-        unhealthyThresholdCount: 2,
-      },
+      open: true,
+      defaultAction: elbv2.ListenerAction.forward([frontendTG]),
     });
-    fargateService.attachToApplicationTargetGroup(frontendTG);
 
-    // Listener rules — /api/* → backend, /* → frontend (default)
+    // Listener rule — /api/* → backend
     listener.addAction('ApiRule', {
       priority: 10,
       conditions: [elbv2.ListenerCondition.pathPatterns(['/api/*'])],
       action: elbv2.ListenerAction.forward([backendTG]),
-    });
-    listener.addAction('FrontendDefault', {
-      action: elbv2.ListenerAction.forward([frontendTG]),
     });
 
     // ── Outputs ───────────────────────────────────────────────────────────────
