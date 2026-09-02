@@ -34,7 +34,8 @@ export class DgenStack extends cdk.Stack {
       bucketName: `dgen-diagrams-${this.account}`,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       encryption: s3.BucketEncryption.S3_MANAGED,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
       lifecycleRules: [
         { expiration: cdk.Duration.days(365), id: 'expire-old-diagrams' },
       ],
@@ -92,7 +93,7 @@ export class DgenStack extends cdk.Stack {
       allocatedStorage: 20,
       storageEncrypted: true,
       deletionProtection: false,
-      removalPolicy: cdk.RemovalPolicy.SNAPSHOT,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     // ── IAM Role for EC2 (instance profile) ──────────────────────────────────
