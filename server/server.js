@@ -69,7 +69,7 @@ app.post('/api/generate', async (req, res) => {
             if (genAI) {
                 console.log('Using Gemini fallback...');
                 const model = genAI.getGenerativeModel({
-                    model: 'gemini-2.0-flash',
+                    model: 'gemini-3.5-flash-lite',
                     systemInstruction: SYSTEM_INSTRUCTION,
                 });
                 const result = await model.generateContent(fullPrompt);
