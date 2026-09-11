@@ -1,0 +1,255 @@
+{
+  "communities": {
+    "0": [
+      "ref_aws_sdk_client_bedrock_runtime",
+      "ref_aws_sdk_client_s3",
+      "ref_aws_sdk_s3_request_presigner",
+      "ref_cors",
+      "ref_dotenv",
+      "ref_express",
+      "ref_google_generative_ai",
+      "ref_pg",
+      "server_db",
+      "server_db_pool",
+      "server_init_db",
+      "server_init_db_pool",
+      "server_package",
+      "server_package_author",
+      "server_package_description",
+      "server_package_keywords",
+      "server_package_license",
+      "server_package_main",
+      "server_package_name",
+      "server_package_type",
+      "server_package_version",
+      "server_server",
+      "server_server_app",
+      "server_server_bedrockclient",
+      "server_server_bedrockruntimeclient_conversecommand",
+      "server_server_cors",
+      "server_server_express",
+      "server_server_getsignedurl",
+      "server_server_googlegenerativeai",
+      "server_server_pool",
+      "server_server_s3client",
+      "server_server_s3client_putobjectcommand_getobjectcommand"
+    ],
+    "1": [
+      "infra_package",
+      "infra_package_bin",
+      "infra_package_bin_infra",
+      "infra_package_dependencies",
+      "infra_package_dependencies_aws_cdk_lib",
+      "infra_package_dependencies_constructs",
+      "infra_package_devdependencies",
+      "infra_package_devdependencies_aws_cdk",
+      "infra_package_devdependencies_source_map_support",
+      "infra_package_devdependencies_ts_node",
+      "infra_package_devdependencies_types_node",
+      "infra_package_devdependencies_typescript",
+      "infra_package_name",
+      "infra_package_scripts",
+      "infra_package_scripts_build",
+      "infra_package_scripts_cdk",
+      "infra_package_scripts_watch",
+      "infra_package_version",
+      "ref_aws_cdk",
+      "ref_source_map_support",
+      "ref_ts_node",
+      "ref_types_node",
+      "ref_typescript"
+    ],
+    "2": [
+      "client_eslint_config",
+      "client_package",
+      "client_package_name",
+      "client_package_private",
+      "client_package_type",
+      "client_package_version",
+      "client_vite_config",
+      "ref_autoprefixer",
+      "ref_eslint",
+      "ref_eslint_js",
+      "ref_eslint_plugin_react_hooks",
+      "ref_eslint_plugin_react_refresh",
+      "ref_globals",
+      "ref_postcss",
+      "ref_react_dom",
+      "ref_tailwindcss",
+      "ref_tailwindcss_postcss",
+      "ref_types_react",
+      "ref_types_react_dom",
+      "ref_vite",
+      "ref_vitejs_plugin_react"
+    ],
+    "3": [
+      "infra_tsconfig",
+      "infra_tsconfig_compileroptions",
+      "infra_tsconfig_compileroptions_alwaysstrict",
+      "infra_tsconfig_compileroptions_declaration",
+      "infra_tsconfig_compileroptions_esmoduleinterop",
+      "infra_tsconfig_compileroptions_lib",
+      "infra_tsconfig_compileroptions_module",
+      "infra_tsconfig_compileroptions_noimplicitany",
+      "infra_tsconfig_compileroptions_noimplicitthis",
+      "infra_tsconfig_compileroptions_outdir",
+      "infra_tsconfig_compileroptions_resolvejsonmodule",
+      "infra_tsconfig_compileroptions_rootdir",
+      "infra_tsconfig_compileroptions_strict",
+      "infra_tsconfig_compileroptions_strictnullchecks",
+      "infra_tsconfig_compileroptions_target",
+      "infra_tsconfig_exclude"
+    ],
+    "4": [
+      "client_package_devdependencies",
+      "client_package_devdependencies_autoprefixer",
+      "client_package_devdependencies_eslint",
+      "client_package_devdependencies_eslint_js",
+      "client_package_devdependencies_eslint_plugin_react_hooks",
+      "client_package_devdependencies_eslint_plugin_react_refresh",
+      "client_package_devdependencies_globals",
+      "client_package_devdependencies_postcss",
+      "client_package_devdependencies_tailwindcss",
+      "client_package_devdependencies_tailwindcss_postcss",
+      "client_package_devdependencies_types_react",
+      "client_package_devdependencies_types_react_dom",
+      "client_package_devdependencies_vite",
+      "client_package_devdependencies_vitejs_plugin_react"
+    ],
+    "5": [
+      "client_src_app",
+      "client_src_app_app",
+      "client_src_components_generatorpage",
+      "client_src_components_generatorpage_generatorpage",
+      "client_src_components_landingpage",
+      "client_src_components_landingpage_landingpage",
+      "client_src_components_mermaidrenderer",
+      "client_src_components_mermaidrenderer_mermaidrenderer",
+      "client_src_main",
+      "ref_file_saver",
+      "ref_lucide_react",
+      "ref_mermaid",
+      "ref_react"
+    ],
+    "6": [
+      "server_package_dependencies",
+      "server_package_dependencies_aws_sdk_client_bedrock_runtime",
+      "server_package_dependencies_aws_sdk_client_s3",
+      "server_package_dependencies_aws_sdk_s3_request_presigner",
+      "server_package_dependencies_cors",
+      "server_package_dependencies_dotenv",
+      "server_package_dependencies_express",
+      "server_package_dependencies_google_generative_ai",
+      "server_package_dependencies_pg"
+    ],
+    "7": [
+      "infra_bin_app",
+      "infra_bin_app_app",
+      "infra_lib_dgen_stack",
+      "infra_lib_dgen_stack_dgenstack",
+      "infra_lib_dgen_stack_dgenstack_constructor",
+      "ref_aws_cdk_lib",
+      "ref_constructs"
+    ],
+    "8": [
+      "client_package_dependencies",
+      "client_package_dependencies_file_saver",
+      "client_package_dependencies_lucide_react",
+      "client_package_dependencies_mermaid",
+      "client_package_dependencies_react",
+      "client_package_dependencies_react_dom"
+    ],
+    "9": [
+      "client_package_scripts",
+      "client_package_scripts_build",
+      "client_package_scripts_dev",
+      "client_package_scripts_lint",
+      "client_package_scripts_preview"
+    ],
+    "10": [
+      "server_package_scripts",
+      "server_package_scripts_dev",
+      "server_package_scripts_init_db",
+      "server_package_scripts_start"
+    ],
+    "11": [
+      "client_tailwind_config",
+      "tailwindcss"
+    ],
+    "12": [
+      "client_postcss_config"
+    ]
+  },
+  "cohesion": {
+    "0": 0.07459677419354839,
+    "1": 0.08695652173913043,
+    "2": 0.11428571428571428,
+    "3": 0.125,
+    "4": 0.14285714285714285,
+    "5": 0.28205128205128205,
+    "6": 0.2222222222222222,
+    "7": 0.38095238095238093,
+    "8": 0.3333333333333333,
+    "9": 0.4,
+    "10": 0.5,
+    "11": 1.0,
+    "12": 1.0
+  },
+  "gods": [
+    {
+      "id": "infra_tsconfig_compileroptions",
+      "label": "compilerOptions",
+      "degree": 14
+    },
+    {
+      "id": "ref_react",
+      "label": "react",
+      "degree": 6
+    },
+    {
+      "id": "client_package_scripts",
+      "label": "scripts",
+      "degree": 5
+    },
+    {
+      "id": "ref_lucide_react",
+      "label": "lucide-react",
+      "degree": 4
+    },
+    {
+      "id": "infra_package_scripts",
+      "label": "scripts",
+      "degree": 4
+    },
+    {
+      "id": "server_package_scripts",
+      "label": "scripts",
+      "degree": 4
+    },
+    {
+      "id": "infra_lib_dgen_stack_dgenstack",
+      "label": "DgenStack",
+      "degree": 3
+    },
+    {
+      "id": "ref_aws_cdk_lib",
+      "label": "aws-cdk-lib",
+      "degree": 3
+    },
+    {
+      "id": "ref_file_saver",
+      "label": "file-saver",
+      "degree": 2
+    },
+    {
+      "id": "ref_mermaid",
+      "label": "mermaid",
+      "degree": 2
+    }
+  ],
+  "surprises": [],
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}
